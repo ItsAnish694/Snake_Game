@@ -37,6 +37,15 @@ body {
   grid-template-rows: repeat(36, 1fr);
 }
 
+.button {
+  background-color: transparent;
+  font-size: 100px;
+  font-weight: bolder;
+  border: none;
+  text-shadow: #daff9e 3px 3px 3px;
+  margin: 20px;
+}
+
 .Score {
   position: absolute;
   top: 0;
@@ -67,15 +76,6 @@ body {
   height: calc(45vw);
   position: fixed;
   z-index: 1;
-}
-
-.button {
-  background-color: transparent;
-  font-size: 100px;
-  font-weight: bolder;
-  border: none;
-  text-shadow: #daff9e 3px 3px 3px;
-  margin: 20px;
 }
 
 .blur {

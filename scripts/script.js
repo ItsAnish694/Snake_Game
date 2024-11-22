@@ -25,6 +25,7 @@ startButton.addEventListener("click", () => {
   document.body.style.cursor = "none";
   startButton.classList.add("hidden");
   gameContainer.classList.remove("blur");
+
   addEventListener("keyup", async (e) => {
     if (!isToFast) {
       if (direction === " ") return;
@@ -43,6 +44,7 @@ startButton.addEventListener("click", () => {
     await delayFunction(140);
     isToFast = false;
   });
+
   Game();
 });
 
@@ -156,6 +158,7 @@ function paused() {
     exit = () => {
       window.close();
     };
+
     restartButton.addEventListener("click", restart);
     resumeButton.addEventListener("click", resume);
     exitButton.addEventListener("click", exit);
