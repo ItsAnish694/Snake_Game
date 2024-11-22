@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="style/style.css" />
+    <script src="scripts/script.js" defer></script>
+  </head>
+  <body>
+    <div class="paused startPage">
+      <button class="button start">Start</button>
+    </div>
+
+    <div id="pausedMenu" class="paused hidden">
+      <h1 class="button hidden">GAME OVER</h1>
+      <button class="button resume">Resume</button>
+      <button class="button restart">Restart</button>
+      <button class="button exit">Exit</button>
+    </div>
+    <div class="gameContainer blur">
+      <div class="Score">
+        <div class="currentScore"><h1>Current Score:0</h1></div>
+        <div class="highScore"><h1>High Score:0</h1></div>
+      </div>
+      <div id="gameBoard"></div>
+    </div>
+  </body>
+</html>
