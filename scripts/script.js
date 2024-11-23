@@ -50,7 +50,9 @@ startButton.addEventListener("click", () => {
 
 document.addEventListener("fullscreenchange", () => {
   if (!document.fullscreenElement) {
-    currentDir = direction;
+    if (direction !== " ") {
+      currentDir = direction;
+    }
     direction = " ";
   }
 });
