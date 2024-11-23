@@ -1,3 +1,4 @@
+//Used Variables and Constants
 const startButton = document.querySelector(".start");
 const resumeButton = document.querySelector(".resume");
 const restartButton = document.querySelector(".restart");
@@ -8,95 +9,128 @@ const gameContainer = document.querySelector(".gameContainer");
 const gameOver = document.querySelector("#pausedMenu h1");
 const currentScore = document.querySelector(".currentScore h1");
 const highScore = document.querySelector(".highScore h1");
-const initialSnake = [{ x: 32, y: 18 }];
+const initialSnake = [{ x: 32, y: 18 }]; //Initial Snake Position
+const initialFood = { x: ranPos(64), y: ranPos(36) };
 const duration = { hard: 50, medium: 100, easy: 150 };
-let isToFast = false;
-let currentDir = null;
+let isToFast = false; //Checks For Rapid Input
+let previousDirection = null; //Stores Previous Direction Input
 let currScore = 0;
 let hiScore = -Infinity;
-let mySet = new Set(`${initialSnake[0].x},${initialSnake[0].y}`);
+let food = null;
+let collisionPosition = new Set(); //For Self And Food Collision Detection Stores Snake Co-Ordinates
 let resume = null;
 let restart = null;
 let exit = null;
-let direction = "d";
+let head = null;
+let snake = null;
+let currentDirection = "d";
 
+//To Start The Game
 startButton.addEventListener("click", () => {
   document.documentElement.requestFullscreen();
   document.body.style.cursor = "none";
   startButton.classList.add("hidden");
   gameContainer.classList.remove("blur");
 
+  //For Directions And Require KeyBoard Inputs
   addEventListener("keyup", async (e) => {
     if (!isToFast) {
-      if (direction === " ") return;
+      if (currentDirection === " ") return;
       if (
-        (e.key === "d" && direction !== "a") ||
-        (e.key === "a" && direction !== "d") ||
-        (e.key === "w" && direction !== "s") ||
-        (e.key === "s" && direction !== "w") ||
-        (e.key === " " && resume === null)
+        (e.key === "d" && currentDirection !== "a") ||
+        (e.key === "a" && currentDirection !== "d") ||
+        (e.key === "w" && currentDirection !== "s") ||
+        (e.key === "s" && currentDirection !== "w") ||
+        e.key === " "
       ) {
-        currentDir = direction;
-        direction = e.key;
+        previousDirection = currentDirection;
+        currentDirection = e.key;
       }
       isToFast = true;
     }
     await delayFunction(140);
     isToFast = false;
   });
-
-  Game();
+  startGame();
 });
 
+// Pause The Game When Exiting FullScreen
 document.addEventListener("fullscreenchange", () => {
   if (!document.fullscreenElement) {
-    if (direction !== " ") {
-      currentDir = direction;
+    //Stops Current Direction From Updating When Game Is Paused And Exiting From FullScreen
+    if (currentDirection !== " ") {
+      previousDirection = currentDirection;
     }
-    direction = " ";
+    currentDirection = " ";
   }
 });
 
-async function Game() {
-  const snake = [...initialSnake];
-  const foodPos = { x: ranPos(64), y: ranPos(36) };
+async function startGame() {
+  snake = [...initialSnake];
+  food = updateFoodPosition(food);
+  const restartFunction = () => {
+    // Resets Required Things In This Function When Restarting
+    restartButton.removeEventListener("click", restart);
+    restart = null;
+  };
 
+  //GameLoop
   while (true) {
-    let head = { ...snake[0] };
-    if (direction === " ") {
-      head = updateHead(head, currentDir);
-      await paused();
+    head = { ...snake[0] }; //Creates New Head To Update
+    if (currentDirection !== " ") {
+      head = updateHead(head, currentDirection); //Updates Head Position With Current Direction
+    } else {
+      // Pause The Game When Space Key Is Pressed
+      head = updateHead(head, previousDirection); //Updates Head Position With Previous Direction
+      await paused(); //Waits For Resuming Or Restarting
       document.body.style.cursor = "none";
       if (resume) {
+        // Reset Resume
         resumeButton.removeEventListener("click", resume);
         resume = null;
       }
-    } else {
-      head = updateHead(head, direction);
+      if (restart) {
+        restartFunction();
+      }
     }
 
-    if (head.x !== foodPos.x || head.y !== foodPos.y) {
-      mySet.delete(`${snake[snake.length - 1].x},${snake[snake.length - 1].y}`);
+    if (head.x !== food.x || head.y !== food.y) {
+      //Updates Snake's Position For Movement
+      collisionPosition.delete(
+        `${snake[snake.length - 1].x},${snake[snake.length - 1].y}`
+      );
       snake.pop();
-      if (inSnake(head, mySet)) {
+      if (inSnake(head, collisionPosition)) {
+        // When Snake Collides With Itself
         await gameOverMenu();
+        if (restart) {
+          restartFunction();
+          snake.pop();
+        }
       }
     } else {
+      // When Snake Eats Food
       updateScore(++currScore);
-      foodPos.x = ranPos(64);
-      foodPos.y = ranPos(36);
-      while (inSnake(foodPos, mySet)) {
-        foodPos.x = ranPos(64);
-        foodPos.y = ranPos(36);
+      food = updateFoodPosition(food);
+
+      while (inSnake(food, collisionPosition)) {
+        // Checks If Food Generates Inside Snake Body
+        food = updateFoodPosition(food);
       }
     }
-    mySet.add(`${head.x},${head.y}`);
+    collisionPosition.add(`${head.x},${head.y}`);
     snake.unshift(head);
-    startGame(snake, foodPos);
+    gameBoardUpdate(snake, food); //Updates The GameBoard
     await delayFunction(duration.easy);
   }
 }
 
+function updateFoodPosition(food) {
+  food = { x: ranPos(64), y: ranPos(36) };
+  return food;
+}
+
+// Function To Return The Updated Head Position
 function updateHead(head, direction) {
   switch (direction) {
     case "w":
@@ -119,64 +153,14 @@ function updateHead(head, direction) {
   return head;
 }
 
-function updateScore(score) {
-  if (currScore > hiScore) hiScore = currScore;
-  currentScore.innerHTML = `Current Score:${score}`;
-  highScore.innerHTML = `High Score:${hiScore}`;
-}
-
-function delayFunction(duration) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, duration);
-  });
-}
-
-async function gameOverMenu() {
-  resumeButton.classList.add("hidden");
-  gameOver.classList.remove("hidden");
-  document.body.style.cursor = "pointer";
-  await paused();
-}
-
-function paused() {
-  return new Promise((resolve) => {
-    document.body.style.cursor = "pointer";
-    pausedMenu.classList.remove("hidden");
-    gameContainer.classList.add("blur");
-
-    restart = () => {
-      location.reload();
-    };
-
-    resume = () => {
-      if (!document.fullscreenElement)
-        document.documentElement.requestFullscreen();
-      gameContainer.classList.remove("blur");
-      direction = currentDir;
-      pausedMenu.classList.add("hidden");
-      resolve();
-    };
-
-    exit = () => {
-      window.close();
-    };
-
-    restartButton.addEventListener("click", restart);
-    resumeButton.addEventListener("click", resume);
-    exitButton.addEventListener("click", exit);
-  });
-}
-
-function ranPos(ranSize) {
-  return Math.floor(Math.random() * ranSize) + 1;
-}
-
-function startGame(snake, foodPos) {
+// To Update The GameBoard
+function gameBoardUpdate(snake, food) {
   gameBoard.innerHTML = "";
   drawSnake(snake);
-  drawFood(foodPos);
+  drawFood(food);
 }
 
+// For Drawing Snake
 function drawSnake(snake) {
   for (let i = 0; i < snake.length; i++) {
     let segment = document.createElement("div");
@@ -187,6 +171,7 @@ function drawSnake(snake) {
   }
 }
 
+// For Drawing Food
 function drawFood(foodPos) {
   let food = document.createElement("div");
   food.className = "food";
@@ -195,8 +180,85 @@ function drawFood(foodPos) {
   gameBoard.append(food);
 }
 
-function inSnake(object, mySet) {
-  if (mySet.has(`${object.x},${object.y}`)) {
+//To Update The Score And HighScore
+function updateScore(score) {
+  if (currScore > hiScore) hiScore = currScore;
+  currentScore.innerHTML = `Current Score: ${score}`;
+  highScore.innerHTML = `High Score: ${hiScore}`;
+}
+
+// For Adding Delay In Game When Needed
+function delayFunction(duration) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, duration);
+  });
+}
+
+//To Pause The Game When Snake Collides With Itself
+async function gameOverMenu() {
+  resumeButton.classList.add("hidden");
+  gameOver.classList.remove("hidden");
+  await paused();
+}
+
+//Function To Pause The Game
+function paused() {
+  return new Promise((resolve) => {
+    document.body.style.cursor = "pointer";
+    pausedMenu.classList.remove("hidden");
+    gameContainer.classList.add("blur");
+
+    restart = () => {
+      // Resets Everything Required When Restarting
+      if (!document.fullscreenElement)
+        document.documentElement.requestFullscreen();
+      currScore = 0;
+      food = updateFoodPosition(food);
+      currentScore.innerHTML = `Current Score: 0`;
+      currentDirection = "d";
+      gameContainer.classList.remove("blur");
+      resumeButton.removeEventListener("click", resume);
+      resume = null;
+      snake = [...initialSnake];
+      head = { ...snake[0] }; //Reset Head
+      pausedMenu.classList.add("hidden");
+      resumeButton.classList.remove("hidden");
+      gameOver.classList.add("hidden");
+      gameBoard.innerHTML = "";
+      collisionPosition.clear();
+      resolve();
+    };
+
+    resume = () => {
+      // Update Everything Required When Resuming
+      if (!document.fullscreenElement)
+        document.documentElement.requestFullscreen();
+      gameContainer.classList.remove("blur");
+      restartButton.removeEventListener("click", restart);
+      restart = null;
+      pausedMenu.classList.add("hidden");
+      currentDirection = previousDirection;
+      resolve();
+    };
+
+    exit = () => {
+      window.close(); //To Exit The Game
+    };
+    //Adding EventListener TO Buttons
+    restartButton.addEventListener("click", restart);
+    resumeButton.addEventListener("click", resume);
+    exitButton.addEventListener("click", exit);
+  });
+}
+
+// Returns Random Position From 1 to Given Size
+function ranPos(ranSize) {
+  return Math.floor(Math.random() * ranSize) + 1;
+}
+
+// Checks If The Object Is Inside Snake Or Not
+function inSnake(object, collisionPosition) {
+  if (collisionPosition.has(`${object.x},${object.y}`)) {
     return true;
   }
   return false;
