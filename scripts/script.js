@@ -68,11 +68,6 @@ document.addEventListener("fullscreenchange", () => {
 async function startGame() {
   snake = [...initialSnake];
   food = updateFoodPosition(food);
-  const restartFunction = () => {
-    // Resets Required Things In This Function When Restarting
-    restartButton.removeEventListener("click", restart);
-    restart = null;
-  };
 
   //GameLoop
   while (true) {
@@ -90,7 +85,8 @@ async function startGame() {
         resume = null;
       }
       if (restart) {
-        restartFunction();
+        restartButton.removeEventListener("click", restart);
+        restart = null;
       }
     }
 
@@ -104,7 +100,8 @@ async function startGame() {
         // When Snake Collides With Itself
         await gameOverMenu();
         if (restart) {
-          restartFunction();
+          restartButton.removeEventListener("click", restart);
+          restart = null;
           snake.pop();
         }
       }
