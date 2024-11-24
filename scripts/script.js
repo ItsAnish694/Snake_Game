@@ -12,6 +12,8 @@ const highScore = document.querySelector(".highScore h1");
 const initialSnake = [{ x: 32, y: 18 }]; //Initial Snake Position
 const initialFood = { x: ranPos(64), y: ranPos(36) };
 const duration = { hard: 50, medium: 100, easy: 150 };
+const foodEatAudio = new Audio("audio/foodEat.mp3");
+const collisionSelf = new Audio("audio/finished.mp3");
 let isTooFast = false; //Checks For Rapid Input
 let previousDirection = null; //Stores Previous Direction Input
 let currScore = 0;
@@ -98,6 +100,7 @@ async function startGame() {
       snake.pop();
       if (inSnake(head, collisionPosition)) {
         // When Snake Collides With Itself
+        await collisionSelf.play();
         await gameOverMenu();
         if (restart) {
           restartButton.removeEventListener("click", restart);
@@ -107,6 +110,7 @@ async function startGame() {
       }
     } else {
       // When Snake Eats Food
+      await foodEatAudio.play();
       updateScore(++currScore);
       food = updateFoodPosition(food);
 
