@@ -12,7 +12,7 @@ const highScore = document.querySelector(".highScore h1");
 const initialSnake = [{ x: 32, y: 18 }]; //Initial Snake Position
 const initialFood = { x: ranPos(64), y: ranPos(36) };
 const duration = { hard: 50, medium: 100, easy: 150 };
-let isToFast = false; //Checks For Rapid Input
+let isTooFast = false; //Checks For Rapid Input
 let previousDirection = null; //Stores Previous Direction Input
 let currScore = 0;
 let hiScore = -Infinity;
@@ -34,7 +34,7 @@ startButton.addEventListener("click", () => {
 
   //For Directions And Require KeyBoard Inputs
   addEventListener("keyup", async (e) => {
-    if (!isToFast) {
+    if (!isTooFast) {
       if (currentDirection === " ") return;
       if (
         (e.key === "d" && currentDirection !== "a") ||
@@ -46,10 +46,10 @@ startButton.addEventListener("click", () => {
         previousDirection = currentDirection;
         currentDirection = e.key;
       }
-      isToFast = true;
+      isTooFast = true;
     }
     await delayFunction(140);
-    isToFast = false;
+    isTooFast = false;
   });
   startGame();
 });
