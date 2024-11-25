@@ -91,7 +91,6 @@ async function startGame() {
         restart = null;
       }
     }
-
     if (head.x !== food.x || head.y !== food.y) {
       //Updates Snake's Position For Movement
       collisionPosition.delete(
@@ -100,7 +99,8 @@ async function startGame() {
       snake.pop();
       if (inSnake(head, collisionPosition)) {
         // When Snake Collides With Itself
-        await collisionSelf.play();
+        collisionSelf.play();
+        await delayFunction(250);
         await gameOverMenu();
         if (restart) {
           restartButton.removeEventListener("click", restart);
@@ -110,7 +110,8 @@ async function startGame() {
       }
     } else {
       // When Snake Eats Food
-      await foodEatAudio.play();
+      foodEatAudio.play();
+      await delayFunction(50);
       updateScore(++currScore);
       food = updateFoodPosition(food);
 
