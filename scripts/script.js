@@ -206,8 +206,8 @@ function updateScore(score) {
     hiScore = currScore;
     localStorage.setItem("High Score", `${hiScore}`);
   }
-  currentScore.innerHTML = `Current Score: ${score}`;
   highScore.innerHTML = `High Score: ${hiScore}`;
+  currentScore.innerHTML = `Current Score: ${score}`;
 }
 
 // For Adding Delay In Game When Needed
