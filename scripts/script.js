@@ -17,7 +17,7 @@ const collisionSelf = new Audio("audio/finished.mp3");
 let isTooFast = false; //Checks For Rapid Input
 let previousDirection = null; //Stores Previous Direction Input
 let currScore = 0;
-let hiScore = -Infinity;
+let hiScore = getLocalHighScore();
 let food = null;
 let collisionPosition = new Set(); //For Self And Food Collision Detection Stores Snake Co-Ordinates
 let resume = null;
@@ -27,9 +27,18 @@ let head = null;
 let snake = null;
 let currentDirection = "d";
 
+function getLocalHighScore() {
+  if (localStorage.length === 0) {
+    localStorage.setItem("High Score", "0");
+    return Number(localStorage.getItem("High Score"));
+  }
+  return Number(localStorage.getItem("High Score"));
+}
+
 //To Start The Game
 startButton.addEventListener("click", () => {
   document.documentElement.requestFullscreen();
+  highScore.innerHTML = `High Score: ${hiScore}`;
   document.body.style.cursor = "none";
   startButton.classList.add("hidden");
   gameContainer.classList.remove("blur");
@@ -113,6 +122,15 @@ async function startGame() {
       foodEatAudio.play();
       await delayFunction(50);
       updateScore(++currScore);
+      if (currScore === 999) {
+        pausedMenu.firstElementChild.innerHTML = "YOU WON!!!";
+        await gameOverMenu();
+        if (restart) {
+          restartButton.removeEventListener("click", restart);
+          restart = null;
+          snake.pop();
+        }
+      }
       food = updateFoodPosition(food);
 
       while (inSnake(food, collisionPosition)) {
@@ -184,7 +202,10 @@ function drawFood(foodPos) {
 
 //To Update The Score And HighScore
 function updateScore(score) {
-  if (currScore > hiScore) hiScore = currScore;
+  if (currScore > hiScore) {
+    hiScore = currScore;
+    localStorage.setItem("High Score", `${hiScore}`);
+  }
   currentScore.innerHTML = `Current Score: ${score}`;
   highScore.innerHTML = `High Score: ${hiScore}`;
 }
