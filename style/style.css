@@ -82,13 +82,13 @@ body {
   filter: blur(9px);
 }
 
+.difficultyOptions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .hidden {
   display: none;
   pointer-events: none;
-}
-
-@media only screen and (max-height: 480px) {
-  .button {
-    font-size: 50px;
-  }
 }

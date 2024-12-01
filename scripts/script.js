@@ -6,12 +6,12 @@ const exitButton = document.querySelector(".exit");
 const gameBoard = document.querySelector("#gameBoard");
 const pausedMenu = document.querySelector("#pausedMenu");
 const gameContainer = document.querySelector(".gameContainer");
+const difficultyOptions = document.querySelector(".difficultyOptions");
 const gameOver = document.querySelector("#pausedMenu h1");
 const currentScore = document.querySelector(".currentScore h1");
 const highScore = document.querySelector(".highScore h1");
 const initialSnake = [{ x: 32, y: 18 }]; //Initial Snake Position
 const initialFood = { x: ranPos(64), y: ranPos(36) };
-const duration = { hard: 50, medium: 100, easy: 150 };
 const foodEatAudio = new Audio("audio/foodEat.mp3");
 const collisionSelf = new Audio("audio/finished.mp3");
 let isTooFast = false; //Checks For Rapid Input
@@ -27,21 +27,15 @@ let head = null;
 let snake = null;
 let currentDirection = "d";
 
-function getLocalHighScore() {
-  if (localStorage.length === 0) {
-    localStorage.setItem("High Score", "0");
-    return Number(localStorage.getItem("High Score"));
-  }
-  return Number(localStorage.getItem("High Score"));
-}
-
 //To Start The Game
 startButton.addEventListener("click", () => {
   document.documentElement.requestFullscreen();
+  difficultyOptions.classList.add("hidden");
   highScore.innerHTML = `High Score: ${hiScore}`;
   document.body.style.cursor = "none";
   startButton.classList.add("hidden");
   gameContainer.classList.remove("blur");
+  const difficulty = getDifficulty(document.getElementById("difficulty"));
 
   //For Directions And Require KeyBoard Inputs
   addEventListener("keyup", async (e) => {
@@ -59,10 +53,10 @@ startButton.addEventListener("click", () => {
       }
       isTooFast = true;
     }
-    await delayFunction(140);
+    await delayFunction(difficulty - 10);
     isTooFast = false;
   });
-  startGame();
+  startGame(difficulty);
 });
 
 // Pause The Game When Exiting FullScreen
@@ -76,7 +70,7 @@ document.addEventListener("fullscreenchange", () => {
   }
 });
 
-async function startGame() {
+async function startGame(difficulty) {
   snake = [...initialSnake];
   food = updateFoodPosition(food);
 
@@ -141,8 +135,30 @@ async function startGame() {
     collisionPosition.add(`${head.x},${head.y}`);
     snake.unshift(head);
     gameBoardUpdate(snake, food); //Updates The GameBoard
-    await delayFunction(duration.easy);
+    await delayFunction(difficulty);
   }
+}
+
+function getDifficulty(difficulty) {
+  options = difficulty.options;
+  index = difficulty.selectedIndex;
+
+  switch (options[index].value) {
+    case "easy":
+      return 150;
+    case "medium":
+      return 100;
+    case "hard":
+      return 50;
+  }
+}
+
+function getLocalHighScore() {
+  if (localStorage.length === 0) {
+    localStorage.setItem("High Score", "0");
+    return Number(localStorage.getItem("High Score"));
+  }
+  return Number(localStorage.getItem("High Score"));
 }
 
 function updateFoodPosition(food) {
