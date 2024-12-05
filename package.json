@@ -1,0 +1,22 @@
+{
+  "name": "snake_game",
+  "version": "1.0.0",
+  "description": "This Is Basic Old Snake Game",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "Snake_Game"
+  },
+  "keywords": [
+    "Snake",
+    "snake",
+    "Game",
+    "game"
+  ],
+  "author": "Anish Dhakal",
+  "license": "ISC"
+}
